@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+prompt_sets/**/*.json
+prompt_sets/**/*.png
+prompt_sets/**/*.jpg
+prompt_sets/**/*.jpeg
+prompt_sets/**/*.webp
+!prompt_sets/.gitkeep
