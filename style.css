@@ -1,0 +1,471 @@
+.forge-prompt-sets-add-card {
+    position: relative;
+    display: inline-block;
+    min-width: 150px;
+    min-height: 210px;
+    box-sizing: border-box;
+    border: 1px dashed transparent;
+    border-radius: 8px;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: #e5e7eb !important;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.forge-prompt-sets-add-content {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.forge-prompt-sets-add-card:hover {
+    border-color: rgba(249, 115, 22, 0.8);
+    background-color: rgba(21, 31, 47, 0.72) !important;
+    transform: translateY(-1px);
+}
+
+.forge-prompt-sets-add-card .forge-favorite-btn {
+    display: none !important;
+}
+
+.forge-prompt-sets-add-card img,
+.forge-prompt-sets-add-card .preview,
+.forge-prompt-sets-add-card .card-image {
+    display: none !important;
+}
+
+.forge-prompt-sets-add-symbol {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    border: 1px solid #64748b !important;
+    background: #1f2937 !important;
+    color: #f8fafc !important;
+    font-size: 38px;
+    line-height: 1;
+    font-weight: 500;
+}
+
+.forge-prompt-sets-add-title {
+    color: #e5e7eb !important;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+body:not(.dark) .forge-prompt-sets-add-title {
+    color: #111827 !important;
+}
+
+.forge-prompt-set-card {
+    position: relative;
+    vertical-align: top;
+}
+
+.forge-prompt-sets-add-card {
+    vertical-align: top;
+}
+
+.forge-prompt-set-card-active {
+    outline: 2px solid #f97316;
+    outline-offset: 1px;
+}
+
+.forge-prompt-set-card .forge-prompt-set-empty-preview {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #1f2937;
+    color: #8ea0b8;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.forge-prompt-set-buttons {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 110;
+    display: flex;
+    gap: 6px;
+    opacity: 1;
+    transition: opacity 0.15s ease;
+}
+
+.forge-prompt-set-card:hover .forge-prompt-set-buttons {
+    opacity: 1;
+}
+
+.forge-prompt-set-icon-btn {
+    min-width: 0;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid rgba(148, 163, 184, 0.9) !important;
+    border-radius: 7px;
+    background: #1f2937 !important;
+    color: #f8fafc !important;
+    opacity: 1 !important;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.forge-prompt-set-icon-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    color: #f8fafc !important;
+    opacity: 1 !important;
+}
+
+.forge-prompt-set-icon-btn svg *,
+.forge-prompt-set-icon-btn svg path {
+    fill: none !important;
+    stroke: #f8fafc !important;
+    opacity: 1 !important;
+}
+
+.forge-prompt-set-icon-btn:hover {
+    border-color: #f97316 !important;
+    background: #111827 !important;
+}
+
+.forge-prompt-set-delete:hover {
+    border-color: #fb7185 !important;
+    color: #fecdd3 !important;
+}
+
+.forge-prompt-sets-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(3, 7, 18, 0.72);
+}
+
+.forge-prompt-sets-dialog.open {
+    display: flex;
+}
+
+.forge-prompt-sets-dialog-panel {
+    width: min(980px, calc(100vw - 48px));
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #0f1623;
+    color: #e5e7eb;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
+}
+
+.forge-prompt-sets-dialog-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.forge-prompt-sets-dialog-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+}
+
+.forge-prompt-sets-dialog-subtitle {
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 0.86rem;
+}
+
+.forge-prompt-sets-x {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    background: #141e2d;
+    color: #f8fafc;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.forge-prompt-sets-x:hover {
+    border-color: #f97316;
+    background: #1f2937;
+}
+
+.forge-prompt-sets-layout {
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) 1fr;
+    gap: 14px;
+}
+
+.forge-prompt-sets-preview-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 260px;
+    border: 1px dashed #475569;
+    border-radius: 8px;
+    background: #111827;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.forge-prompt-sets-preview-box:hover {
+    border-color: #f97316;
+}
+
+.forge-prompt-sets-preview-box.drag-over {
+    border-color: #4dabf7;
+    background: rgba(37, 99, 235, 0.12);
+    box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.35);
+}
+
+.forge-prompt-sets-preview {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.forge-prompt-sets-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.forge-prompt-sets-preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #cbd5e1;
+    text-align: center;
+}
+
+.forge-prompt-sets-preview-placeholder small {
+    color: #94a3b8;
+}
+
+.forge-prompt-sets-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.forge-prompt-sets-row.two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.forge-prompt-sets-fields label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #cbd5e1;
+    font-size: 0.86rem;
+}
+
+.forge-prompt-sets-fields textarea,
+.forge-prompt-sets-fields input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #334155;
+    border-radius: 7px;
+    background: #1f2937;
+    color: #f8fafc;
+    padding: 9px 10px;
+    font: inherit;
+    outline: none;
+}
+
+.forge-prompt-sets-fields textarea {
+    line-height: 1.35;
+    overflow-y: hidden;
+    resize: vertical;
+}
+
+.forge-prompt-sets-fields textarea:focus,
+.forge-prompt-sets-fields input:focus {
+    border-color: #f97316;
+}
+
+.forge-prompt-sets-combobox {
+    position: relative;
+}
+
+.forge-prompt-sets-suggestions {
+    position: absolute;
+    z-index: 10003;
+    top: calc(100% + 7px);
+    left: 0;
+    right: 0;
+    max-height: 222px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 6px;
+    border: 1px solid #3f4f66;
+    border-radius: 10px;
+    background: #0c1320;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.48);
+}
+
+.forge-prompt-sets-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 38px;
+    box-sizing: border-box;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #c9eef7;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.forge-prompt-sets-suggestion:hover,
+.forge-prompt-sets-suggestion.active {
+    background: #111c2d;
+}
+
+.forge-prompt-sets-suggestion-mark {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f97316;
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.55);
+}
+
+.forge-prompt-sets-suggestion-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.forge-prompt-sets-prompt,
+.forge-prompt-sets-negative {
+    min-height: 108px;
+    max-height: 250px;
+}
+
+.forge-prompt-sets-description {
+    min-height: 82px;
+    max-height: 190px;
+}
+
+.forge-prompt-sets-inline-actions {
+    display: flex;
+    align-items: end;
+}
+
+.forge-prompt-sets-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.forge-prompt-sets-clear {
+    margin-right: 6px;
+}
+
+.forge-prompt-sets-status {
+    flex: 1 1 auto;
+    color: #94a3b8;
+    font-size: 0.86rem;
+}
+
+.forge-prompt-sets-status.error {
+    color: #fb7185;
+}
+
+.forge-prompt-sets-btn {
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid #475569;
+    border-radius: 7px;
+    background: #263244;
+    color: #f8fafc;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.forge-prompt-sets-btn:hover {
+    border-color: #f97316;
+    background: #334155;
+}
+
+.forge-prompt-sets-btn.primary {
+    border-color: #f97316;
+    background: #f97316;
+    color: #fff;
+}
+
+.forge-prompt-sets-btn.primary:hover {
+    background: #ea580c;
+}
+
+.forge-prompt-sets-btn.danger {
+    border-color: #7f1d1d;
+    background: #3f1f25;
+    color: #fecdd3;
+}
+
+.forge-prompt-sets-btn.danger:hover {
+    border-color: #fb7185;
+    background: #5f1b2a;
+}
+
+.forge-prompt-sets-btn.ghost {
+    background: transparent;
+}
+
+@media (max-width: 840px) {
+    .forge-prompt-sets-layout,
+    .forge-prompt-sets-row.two {
+        grid-template-columns: 1fr;
+    }
+
+    .forge-prompt-sets-preview-box {
+        min-height: 180px;
+    }
+}
