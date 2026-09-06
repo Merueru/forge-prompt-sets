@@ -43,14 +43,17 @@
                 <input class="forge-prompt-sets-original-id" type="hidden">
 
                 <div class="forge-prompt-sets-layout">
-                    <label class="forge-prompt-sets-preview-box">
+                    <div class="forge-prompt-sets-preview-box">
                         <input class="forge-prompt-sets-preview" type="file" accept="image/*">
-                        <img class="forge-prompt-sets-preview-img" alt="" hidden>
-                        <span class="forge-prompt-sets-preview-placeholder">
+                        <button class="forge-prompt-sets-preview-image-button" type="button" hidden aria-label="Open preview image">
+                            <img class="forge-prompt-sets-preview-img" alt="">
+                        </button>
+                        <button class="forge-prompt-sets-preview-placeholder" type="button">
                             <strong>Preview image</strong>
                             <small>Click to choose a card image</small>
-                        </span>
-                    </label>
+                        </button>
+                        <button class="forge-prompt-sets-preview-upload" type="button" hidden>Change | upload image</button>
+                    </div>
 
                     <div class="forge-prompt-sets-fields">
                         <div class="forge-prompt-sets-row two">
@@ -102,6 +105,17 @@
                     </div>
                 </div>
             </div>
+            <div class="forge-prompt-sets-image-viewer" hidden role="dialog" aria-modal="true" aria-label="Preview image">
+                <div class="forge-prompt-sets-image-viewer-panel">
+                    <div class="forge-prompt-sets-image-viewer-head">
+                        <span>Preview image</span>
+                        <button class="forge-prompt-sets-x forge-prompt-sets-image-viewer-close" type="button" title="Close preview" aria-label="Close preview">X</button>
+                    </div>
+                    <div class="forge-prompt-sets-image-viewport">
+                        <img class="forge-prompt-sets-image-viewer-img" alt="">
+                    </div>
+                </div>
+            </div>
         `;
 
         dialog.querySelector(".forge-prompt-sets-close").addEventListener("click", (event) => {
@@ -120,6 +134,10 @@
             closeDialog(tabname);
         });
         dialog.querySelector(".forge-prompt-sets-preview").addEventListener("change", () => updatePreviewFromFile(tabname));
+        dialog.querySelector(".forge-prompt-sets-preview-placeholder").addEventListener("click", () => choosePreviewFile(tabname));
+        dialog.querySelector(".forge-prompt-sets-preview-upload").addEventListener("click", () => choosePreviewFile(tabname));
+        dialog.querySelector(".forge-prompt-sets-preview-image-button").addEventListener("click", () => openPreviewViewer(tabname));
+        wirePreviewViewer(dialog, tabname);
         wirePreviewDrop(dialog, tabname);
         dialog.querySelectorAll(".forge-prompt-sets-fields textarea").forEach((textarea) => {
             textarea.addEventListener("input", () => autoGrowTextarea(textarea));
@@ -177,6 +195,7 @@
 
     function closeDialog(tabname) {
         const dialog = root(tabname);
+        closePreviewViewer(tabname);
         hideFolderSuggestions(tabname);
         dialog.classList.remove("open");
     }
@@ -520,17 +539,108 @@
     function setPreview(tabname, src) {
         const image = field(tabname, ".forge-prompt-sets-preview-img");
         const placeholder = field(tabname, ".forge-prompt-sets-preview-placeholder");
-        if (!image || !placeholder) return;
+        const box = field(tabname, ".forge-prompt-sets-preview-box");
+        const imageButton = field(tabname, ".forge-prompt-sets-preview-image-button");
+        const uploadButton = field(tabname, ".forge-prompt-sets-preview-upload");
+        if (!image || !placeholder || !box || !imageButton || !uploadButton) return;
 
         if (src) {
             image.src = src;
-            image.hidden = false;
+            imageButton.hidden = false;
+            uploadButton.hidden = false;
             placeholder.hidden = true;
+            box.classList.add("has-image");
         } else {
             image.removeAttribute("src");
-            image.hidden = true;
+            imageButton.hidden = true;
+            uploadButton.hidden = true;
             placeholder.hidden = false;
+            box.classList.remove("has-image");
         }
+    }
+
+    function choosePreviewFile(tabname) {
+        const input = previewInput(tabname);
+        if (input) input.click();
+    }
+
+    function openPreviewViewer(tabname) {
+        const source = field(tabname, ".forge-prompt-sets-preview-img");
+        const viewer = field(tabname, ".forge-prompt-sets-image-viewer");
+        const image = field(tabname, ".forge-prompt-sets-image-viewer-img");
+        if (!source || !source.src || !viewer || !image) return;
+
+        image.src = source.src;
+        viewer.hidden = false;
+        resetPreviewViewer(viewer);
+        field(tabname, ".forge-prompt-sets-image-viewer-close").focus();
+    }
+
+    function closePreviewViewer(tabname) {
+        const viewer = field(tabname, ".forge-prompt-sets-image-viewer");
+        if (!viewer) return;
+        viewer.hidden = true;
+        const image = viewer.querySelector(".forge-prompt-sets-image-viewer-img");
+        if (image) image.removeAttribute("src");
+        const previewButton = field(tabname, ".forge-prompt-sets-preview-image-button");
+        if (previewButton && root(tabname).classList.contains("open")) previewButton.focus();
+    }
+
+    function resetPreviewViewer(viewer) {
+        const image = viewer.querySelector(".forge-prompt-sets-image-viewer-img");
+        if (!image) return;
+        image.__forgePromptSetsScale = 1;
+        image.__forgePromptSetsX = 0;
+        image.__forgePromptSetsY = 0;
+        image.style.transform = "translate(0px, 0px) scale(1)";
+    }
+
+    function updatePreviewViewerTransform(image) {
+        image.style.transform = `translate(${image.__forgePromptSetsX || 0}px, ${image.__forgePromptSetsY || 0}px) scale(${image.__forgePromptSetsScale || 1})`;
+    }
+
+    function wirePreviewViewer(dialog, tabname) {
+        const viewer = dialog.querySelector(".forge-prompt-sets-image-viewer");
+        const viewport = dialog.querySelector(".forge-prompt-sets-image-viewport");
+        const image = dialog.querySelector(".forge-prompt-sets-image-viewer-img");
+        if (!viewer || !viewport || !image || viewer.dataset.ready === "true") return;
+        viewer.dataset.ready = "true";
+
+        dialog.querySelector(".forge-prompt-sets-image-viewer-close").addEventListener("click", () => closePreviewViewer(tabname));
+        viewer.addEventListener("click", (event) => {
+            if (event.target === viewer) closePreviewViewer(tabname);
+        });
+        viewport.addEventListener("wheel", (event) => {
+            prevent(event);
+            const scale = image.__forgePromptSetsScale || 1;
+            image.__forgePromptSetsScale = Math.min(8, Math.max(0.25, scale * (event.deltaY < 0 ? 1.12 : 0.89)));
+            updatePreviewViewerTransform(image);
+        }, {passive: false});
+        viewport.addEventListener("pointerdown", (event) => {
+            image.__forgePromptSetsDrag = {x: event.clientX, y: event.clientY};
+            viewport.setPointerCapture(event.pointerId);
+            viewport.classList.add("dragging");
+        });
+        viewport.addEventListener("pointermove", (event) => {
+            const drag = image.__forgePromptSetsDrag;
+            if (!drag) return;
+            image.__forgePromptSetsX = (image.__forgePromptSetsX || 0) + event.clientX - drag.x;
+            image.__forgePromptSetsY = (image.__forgePromptSetsY || 0) + event.clientY - drag.y;
+            image.__forgePromptSetsDrag = {x: event.clientX, y: event.clientY};
+            updatePreviewViewerTransform(image);
+        });
+        const endDrag = () => {
+            image.__forgePromptSetsDrag = null;
+            viewport.classList.remove("dragging");
+        };
+        viewport.addEventListener("pointerup", endDrag);
+        viewport.addEventListener("pointercancel", endDrag);
+        dialog.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !viewer.hidden) {
+                prevent(event);
+                closePreviewViewer(tabname);
+            }
+        });
     }
 
     function isImageFile(file) {
