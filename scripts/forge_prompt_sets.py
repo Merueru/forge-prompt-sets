@@ -356,6 +356,11 @@ class PromptSetsPage(ui_extra_networks.ExtraNetworksPage):
                 yield item
 
     def create_item_html(self, tabname, item, template=None):
+        # Tree view asks for the template arguments, while the card grid asks
+        # for rendered HTML. Preserve the base-class contract for tree items.
+        if template is None and not item.get("is_add_card"):
+            return super().create_item_html(tabname, item)
+
         if item.get("is_add_card"):
             onclick = html.escape(f"forgePromptSetsOpen(event, '{tabname}')")
             if template is None:
