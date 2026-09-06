@@ -60,7 +60,7 @@ Click a prompt set card to apply it.
 
 ## Update
 
-![image preview](./imgs/psimg005.png)
+![image preview](./imgs/psimg005.5.png)
 ![image preview](./imgs/psimg006.png)
 
 - 6/9/26 update image preview modal
