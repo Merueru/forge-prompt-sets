@@ -58,6 +58,13 @@ Click a prompt set card to apply it.
 - Click the same card again to remove the text that card added.
 - Prompt sets keep the normal Extra Networks card layout and search behavior.
 
+## Update
+
+![image preview](./imgs/psimg005.png)
+![image preview](./imgs/psimg006.png)
+
+- 6/9/26 update image preview modal
+
 ## Features
 
 - Save reusable prompt cards from the Extra Networks panel.
