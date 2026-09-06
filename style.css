@@ -246,6 +246,10 @@ body:not(.dark) .forge-prompt-sets-add-title {
     cursor: default;
 }
 
+.forge-prompt-sets-preview-box.has-image .forge-prompt-sets-preview-placeholder {
+    display: none !important;
+}
+
 .forge-prompt-sets-preview-box:hover {
     border-color: #f97316;
 }
