@@ -8,6 +8,11 @@
     };
     const injectedPromptSets = {};
     const initialRefreshDone = new Set();
+    const addCardObservers = new Map();
+    const addCardAnchorTimers = new Map();
+    const selectedPromptSetGroups = new Map();
+    const groupTrackingRoots = new Map();
+    let globalPromptSetsFilterHooksInstalled = false;
 
     function app() {
         return typeof gradioApp === "function" ? gradioApp() : document;
@@ -295,6 +300,150 @@
         return app().querySelector(`#${tabname}_prompt_sets_cards`);
     }
 
+    function enforceAddCardAnchor(tabname) {
+        const container = promptSetsCardsContainer(tabname);
+        const addCard = container ? container.querySelector(".forge-prompt-sets-add-card") : null;
+        if (!container || !addCard) return;
+
+        if (addCard.classList.contains("hidden")) addCard.classList.remove("hidden");
+        if (addCard.hidden) addCard.hidden = false;
+        if (addCard.style.display === "none") addCard.style.display = "";
+        if (container.firstElementChild !== addCard) container.prepend(addCard);
+    }
+
+    function wireAddCardAnchor(tabname) {
+        const container = promptSetsCardsContainer(tabname);
+        if (!container) return;
+
+        const current = addCardObservers.get(tabname);
+        if (!current || current.container !== container) {
+            if (current) current.observer.disconnect();
+            const observer = new MutationObserver(() => enforceAddCardAnchor(tabname));
+            observer.observe(container, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ["class", "hidden"],
+            });
+            addCardObservers.set(tabname, {container, observer});
+        }
+
+        enforceAddCardAnchor(tabname);
+    }
+
+    function scheduleAddCardAnchor(tabname) {
+        const previousTimer = addCardAnchorTimers.get(tabname);
+        if (previousTimer) clearTimeout(previousTimer);
+
+        const timer = setTimeout(() => {
+            addCardAnchorTimers.delete(tabname);
+            wireAddCardAnchor(tabname);
+            enforceAddCardAnchor(tabname);
+        }, 25);
+        addCardAnchorTimers.set(tabname, timer);
+    }
+
+    function wirePromptSetsGroupTracking(tabname) {
+        const page = app().querySelector(`#${tabname}_prompt_sets`);
+        const search = app().querySelector(`#${tabname}_prompt_sets_extra_search`);
+        if (!page || !search) return;
+
+        const currentRoot = groupTrackingRoots.get(tabname);
+        if (currentRoot !== page) {
+            if (currentRoot) {
+                currentRoot.removeEventListener("click", currentRoot.__forgePromptSetsGroupClick);
+                currentRoot.removeEventListener("click", currentRoot.__forgePromptSetsFilterClick);
+            }
+
+            const onGroupClick = (event) => {
+                const button = event.target.closest("button[onclick*='extraNetworksSearchButton']");
+                if (!button || !page.contains(button)) return;
+                selectedPromptSetGroups.set(
+                    tabname,
+                    button.classList.contains("search-all") ? "" : button.textContent.trim(),
+                );
+            };
+            const onFilterClick = (event) => {
+                const control = event.target.closest("[onclick*='extraNetworks']");
+                if (control && page.contains(control)) scheduleAddCardAnchor(tabname);
+            };
+            page.__forgePromptSetsGroupClick = onGroupClick;
+            page.__forgePromptSetsFilterClick = onFilterClick;
+            page.addEventListener("click", onGroupClick);
+            page.addEventListener("click", onFilterClick);
+            groupTrackingRoots.set(tabname, page);
+        }
+
+        if (!search.__forgePromptSetsSearchTracking) {
+            search.__forgePromptSetsSearchTracking = true;
+            search.addEventListener("input", () => {
+                const selectedGroup = selectedPromptSetGroups.get(tabname);
+                if (selectedGroup && search.value.trim() !== selectedGroup.trim()) {
+                    selectedPromptSetGroups.delete(tabname);
+                }
+                scheduleAddCardAnchor(tabname);
+            });
+        }
+
+        scheduleAddCardAnchor(tabname);
+    }
+
+    function selectedPromptSetGroup(tabname) {
+        const dirs = app().querySelector(`#${tabname}_prompt_sets_dirs`);
+        const included = dirs ? Array.from(dirs.querySelectorAll("button[data-fbc-dir-state='include']")) : [];
+        if (included.length === 1) {
+            return included[0].textContent.trim().replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
+        }
+        // Multiple included groups have no single unambiguous destination.
+        if (included.length > 1 || (dirs && dirs.querySelector("button[data-fbc-dir-state='exclude']"))) return "";
+        const selectedGroup = selectedPromptSetGroups.get(tabname);
+        return selectedGroup ? selectedGroup.trim() : "";
+    }
+
+    function promptSetsTabnameFromPane(element) {
+        const pane = element && element.closest ? element.closest(".extra-network-pane") : null;
+        const match = pane && pane.id ? pane.id.match(/^(.+)_prompt_sets_pane$/) : null;
+        return match ? match[1] : "";
+    }
+
+    function installGlobalPromptSetsFilterHooks() {
+        if (globalPromptSetsFilterHooksInstalled || typeof document === "undefined") return;
+        globalPromptSetsFilterHooksInstalled = true;
+
+        document.addEventListener("input", (event) => {
+            const target = event.target;
+            const match = target && target.id ? target.id.match(/^(.+)_prompt_sets_extra_search$/) : null;
+            if (!match) return;
+
+            const selectedGroup = selectedPromptSetGroups.get(match[1]);
+            if (selectedGroup && target.value.trim() !== selectedGroup.trim()) {
+                selectedPromptSetGroups.delete(match[1]);
+            }
+            scheduleAddCardAnchor(match[1]);
+        });
+
+        document.addEventListener("click", (event) => {
+            const target = event.target;
+            const groupButton = target && target.closest
+                ? target.closest("button[onclick*='extraNetworksSearchButton']")
+                : null;
+            const control = target && target.closest
+                ? target.closest("[onclick*='extraNetworks']")
+                : null;
+            const source = groupButton || control;
+            const tabname = promptSetsTabnameFromPane(source);
+            if (!tabname) return;
+
+            if (groupButton) {
+                selectedPromptSetGroups.set(
+                    tabname,
+                    groupButton.classList.contains("search-all") ? "" : groupButton.textContent.trim(),
+                );
+            }
+            scheduleAddCardAnchor(tabname);
+        });
+    }
+
     function findPromptSetCard(tabname, promptSetId) {
         const container = promptSetsCardsContainer(tabname);
         if (!container) return null;
@@ -380,7 +529,10 @@
     function refreshPromptSetsAfterInitialRender() {
         app().querySelectorAll("[id$='_prompt_sets_extra_refresh_internal']").forEach((button) => {
             const tabname = tabnameFromRefreshButton(button);
-            if (!tabname || initialRefreshDone.has(tabname)) return;
+            if (!tabname) return;
+            wireAddCardAnchor(tabname);
+            wirePromptSetsGroupTracking(tabname);
+            if (initialRefreshDone.has(tabname)) return;
             initialRefreshDone.add(tabname);
 
             setTimeout(() => {
@@ -391,6 +543,8 @@
     }
 
     function registerInitialPromptSetsRefresh() {
+        installGlobalPromptSetsFilterHooks();
+
         if (typeof window.onAfterUiUpdate === "function") {
             window.onAfterUiUpdate(refreshPromptSetsAfterInitialRender);
         } else if (typeof onAfterUiUpdate === "function") {
@@ -835,6 +989,8 @@
         const dialog = ensureDialog(tabname);
         dialog.classList.add("open");
         window.forgePromptSetsClear(null, tabname, false);
+        const selectedGroup = selectedPromptSetGroup(tabname);
+        if (selectedGroup) field(tabname, ".forge-prompt-sets-folder").value = selectedGroup;
         await populateFolders(tabname);
     };
 
