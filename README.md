@@ -64,6 +64,7 @@ Click a prompt set card to apply it.
 ![image preview](./imgs/psimg006.png)
 
 - 6/9/26 update image preview modal
+- 18/9/26 — Keep the “Add Prompt Set” card visible while filtering, and automatically preselect the selected group when creating a new prompt set.
 
 ## Features
 
