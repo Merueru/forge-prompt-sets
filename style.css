@@ -1,3 +1,7 @@
+[id$="_prompt_sets_cards"].extra-network-cards > .card.forge-prompt-sets-add-card {
+    display: inline-block !important;
+}
+
 .forge-prompt-sets-add-card {
     position: relative;
     display: inline-block;
